@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Generator Harvard | ATS-Friendly</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎓 CV Generator Harvard</h1>
+            <p>Crea tu CV estilo Harvard, ATS-friendly con AI Coach</p>
+        </header>
+
+        <div class="main-content">
+            <aside class="input-panel">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="personal">Datos Personales</button>
+                    <button class="tab-btn" data-tab="experience">Experiencia</button>
+                    <button class="tab-btn" data-tab="education">Educación</button>
+                    <button class="tab-btn" data-tab="skills">Habilidades</button>
+                    <button class="tab-btn" data-tab="coach">AI Coach</button>
+                </div>
+
+                <div id="personal" class="tab-content active">
+                    <h3>Información Personal</h3>
+                    <input type="text" id="fullName" placeholder="Nombre completo" class="input-field">
+                    <input type="email" id="email" placeholder="Email" class="input-field">
+                    <input type="tel" id="phone" placeholder="Teléfono" class="input-field">
+                    <input type="text" id="location" placeholder="Ciudad, País" class="input-field">
+                    <input type="url" id="website" placeholder="Sitio web / LinkedIn" class="input-field">
+                    <textarea id="summary" placeholder="Resumen profesional (2-3 líneas)" class="input-field" rows="4"></textarea>
+                    <button class="btn-coach-help" onclick="getCoachTip('summary')">💡 Coach: Mejorar resumen</button>
+                </div>
+
+                <div id="experience" class="tab-content">
+                    <h3>Experiencia Laboral</h3>
+                    <div id="experienceList"></div>
+                    <button class="btn-add" onclick="addExperience()">+ Agregar experiencia</button>
+                </div>
+
+                <div id="education" class="tab-content">
+                    <h3>Educación</h3>
+                    <div id="educationList"></div>
+                    <button class="btn-add" onclick="addEducation()">+ Agregar educación</button>
+                </div>
+
+                <div id="skills" class="tab-content">
+                    <h3>Habilidades</h3>
+                    <textarea id="skillsInput" placeholder="Ingresa habilidades separadas por comas" class="input-field" rows="4"></textarea>
+                    <button class="btn-coach-help" onclick="getCoachTip('skills')">💡 Coach: Optimizar habilidades ATS</button>
+                </div>
+
+                <div id="coach" class="tab-content">
+                    <h3>🤖 AI Coach</h3>
+                    <div id="coachPanel" class="coach-panel"></div>
+                </div>
+            </aside>
+
+            <main class="preview-panel">
+                <div class="preview-controls">
+                    <button class="btn-primary" onclick="downloadPDF()">📥 Descargar PDF</button>
+                    <button class="btn-primary" onclick="downloadDOCX()">📥 Descargar DOCX</button>
+                    <button class="btn-secondary" onclick="printCV()">🖨️ Imprimir</button>
+                </div>
+                <div id="cvPreview" class="cv-preview"></div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/ai-coach.js"></script>
+    <script src="js/cv-generator.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
