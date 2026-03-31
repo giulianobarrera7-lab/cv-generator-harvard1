@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CV Builder Pro — Generador de CV ATS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">◈</span>
+      <span class="logo-text">CV<strong>Builder</strong></span>
+    </div>
+    <nav class="header-nav">
+      <button class="nav-tab active" data-tab="editor">✏️ Editor</button>
+      <button class="nav-tab" data-tab="preview">👁️ Vista Previa</button>
+      <button class="nav-tab" data-tab="adaptar">🎯 Adaptar a Oferta</button>
+      <button class="nav-tab" data-tab="coach">📊 Coach ATS</button>
+    </nav>
+    <div class="header-actions">
+      <button class="btn-icon" id="btnToggleTheme" title="Modo oscuro">🌙</button>
+      <button class="btn-secondary" id="btnSaveDraft">💾 Guardar</button>
+      <button class="btn-primary" id="btnExportPDF">⬇️ Exportar PDF</button>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="app-main">
+
+  <!-- ===== TAB: EDITOR ===== -->
+  <section class="tab-content active" id="tab-editor">
+    <div class="editor-layout">
+
+      <!-- PANEL IZQUIERDO: FORMULARIO -->
+      <div class="form-panel">
+
+        <!-- IMPORTAR -->
+        <div class="import-bar">
+          <span class="import-label">Importar datos:</span>
+          <label class="btn-import" title="Subí tu CV en PDF">
+            📄 Mi CV en PDF
+            <input type="file" id="importCVPDF" accept=".pdf" hidden />
+          </label>
+          <label class="btn-import" title="PDF exportado de LinkedIn">
+            💼 LinkedIn PDF
+            <input type="file" id="importLinkedIn" accept=".pdf" hidden />
+          </label>
+          <label class="btn-import" title="Imagen con tus datos">
+            🖼️ Imagen / Foto
+            <input type="file" id="importImageOCR" accept="image/*" hidden />
+          </label>
+          <button class="btn-import" id="btnLoadDraft">📂 Cargar borrador</button>
+          <button class="btn-import" id="btnExportJSON">📤 Exportar JSON</button>
+          <label class="btn-import">
+            📥 Importar JSON
+            <input type="file" id="importJSON" accept=".json" hidden />
+          </label>
+        </div>
+
+        <!-- MODAL OCR / IMPORT STATUS -->
+        <div id="importStatus" class="import-status hidden">
+          <div class="import-status-inner">
+            <div class="spinner"></div>
+            <span id="importStatusText">Procesando...</span>
+          </div>
+        </div>
+
+        <!-- SECCIÓN: DATOS PERSONALES -->
+        <div class="form-section">
+          <h3 class="section-title">👤 Datos Personales</h3>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Nombre completo *</label>
+              <input type="text" id="nombre" placeholder="Ej: Giuliano Barrera" />
+            </div>
+            <div class="form-group">
+              <label>Email *</label>
+              <input type="email" id="email" placeholder="tu@email.com" />
+            </div>
+            <div class="form-group">
+              <label>Teléfono</label>
+              <input type="text" id="telefono" placeholder="+54 9 299 000-0000" />
+            </div>
+            <div class="form-group">
+              <label>LinkedIn</label>
+              <input type="text" id="linkedin" placeholder="linkedin.com/in/tu-perfil" />
+            </div>
+            <div class="form-group">
+              <label>Ciudad / Ubicación</label>
+              <input type="text" id="ubicacion" placeholder="Ej: Neuquén Capital, Argentina" />
+            </div>
+            <div class="form-group">
+              <label>Foto de perfil (opcional)</label>
+              <div class="photo-upload">
+                <label class="photo-label" id="photoLabel">
+                  <img id="photoPreview" src="" alt="" style="display:none" />
+                  <span id="photoPlaceholder">+ Subir foto</span>
+                  <input type="file" id="fotoInput" accept="image/*" hidden />
+                </label>
+                <button class="btn-remove-photo hidden" id="btnRemovePhoto">✕ Quitar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN: RESUMEN PROFESIONAL -->
+        <div class="form-section">
+          <h3 class="section-title">📝 Resumen Profesional</h3>
+          <div class="form-group">
+            <textarea id="resumen" rows="4" placeholder="Describí tu perfil en 3-5 líneas. Usá verbos de acción e incluí palabras clave del rubro..."></textarea>
+            <div class="char-count"><span id="resumenCount">0</span> palabras</div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN: EXPERIENCIA LABORAL -->
+        <div class="form-section">
+          <h3 class="section-title">💼 Experiencia Laboral</h3>
+          <div id="experienciaList"></div>
+          <button class="btn-add" id="btnAddExperiencia">+ Agregar experiencia</button>
+        </div>
+
+        <!-- SECCIÓN: EDUCACIÓN -->
+        <div class="form-section">
+          <h3 class="section-title">🎓 Educación</h3>
+          <div id="educacionList"></div>
+          <button class="btn-add" id="btnAddEducacion">+ Agregar educación</button>
+        </div>
+
+        <!-- SECCIÓN: HABILIDADES -->
+        <div class="form-section">
+          <h3 class="section-title">⚡ Habilidades Técnicas</h3>
+          <div id="habilidadesList" class="tags-container"></div>
+          <div class="tag-input-row">
+            <input type="text" id="habilidadInput" placeholder="Ej: AutoCAD, Python, Excel..." />
+            <button class="btn-add-tag" id="btnAddHabilidad">+ Agregar</button>
+          </div>
+        </div>
+
+        <!-- SECCIÓN: IDIOMAS -->
+        <div class="form-section">
+          <h3 class="section-title">🌐 Idiomas</h3>
+          <div id="idiomasList"></div>
+          <button class="btn-add" id="btnAddIdioma">+ Agregar idioma</button>
+        </div>
+
+        <!-- SECCIÓN: CERTIFICACIONES -->
+        <div class="form-section">
+          <h3 class="section-title">🏅 Certificaciones</h3>
+          <div id="certificacionesList"></div>
+          <button class="btn-add" id="btnAddCertificacion">+ Agregar certificación</button>
+        </div>
+
+      </div><!-- /form-panel -->
+
+      <!-- PANEL DERECHO: MINI PREVIEW + PLANTILLAS -->
+      <div class="side-panel">
+        <div class="plantillas-panel">
+          <h4>🎨 Plantilla</h4>
+          <div class="plantillas-grid">
+            <button class="plantilla-btn active" data-plantilla="harvard">
+              <div class="plantilla-thumb harvard-thumb"></div>
+              <span>Harvard</span>
+            </button>
+            <button class="plantilla-btn" data-plantilla="moderna">
+              <div class="plantilla-thumb moderna-thumb"></div>
+              <span>Moderna</span>
+            </button>
+            <button class="plantilla-btn" data-plantilla="ejecutiva">
+              <div class="plantilla-thumb ejecutiva-thumb"></div>
+              <span>Ejecutiva</span>
+            </button>
+            <button class="plantilla-btn" data-plantilla="creativa">
+              <div class="plantilla-thumb creativa-thumb"></div>
+              <span>Creativa</span>
+            </button>
+            <button class="plantilla-btn" data-plantilla="tecnica">
+              <div class="plantilla-thumb tecnica-thumb"></div>
+              <span>Técnica IT</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="export-panel">
+          <h4>⬇️ Exportar</h4>
+          <button class="btn-export-full" id="btnExportPDF2">📄 Descargar PDF</button>
+          <button class="btn-export-full" id="btnExportDOCX">📝 Descargar DOCX</button>
+        </div>
+
+        <div class="ats-mini-panel">
+          <h4>📊 Puntaje ATS</h4>
+          <div class="ats-score-circle">
+            <svg viewBox="0 0 36 36" class="ats-ring">
+              <path class="ats-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              <path class="ats-ring-fill" id="atsRingFill" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            </svg>
+            <span class="ats-score-number" id="atsScoreNumber">0</span>
+          </div>
+          <p class="ats-score-label" id="atsScoreLabel">Completá el formulario</p>
+        </div>
+      </div>
+
+    </div><!-- /editor-layout -->
+  </section>
+
+  <!-- ===== TAB: VISTA PREVIA ===== -->
+  <section class="tab-content" id="tab-preview">
+    <div class="preview-toolbar">
+      <button class="btn-secondary" id="btnExportPDF3">⬇️ PDF</button>
+      <button class="btn-secondary" id="btnExportDOCX2">⬇️ DOCX</button>
+      <select id="plantillaSelect">
+        <option value="harvard">Harvard Clásica</option>
+        <option value="moderna">Moderna Minimalista</option>
+        <option value="ejecutiva">Profesional Ejecutiva</option>
+        <option value="creativa">Creativa (con foto)</option>
+        <option value="tecnica">Técnica IT</option>
+      </select>
+    </div>
+    <div class="cv-preview-wrapper">
+      <div id="cvPreview" class="cv-preview harvard-template">
+        <!-- Generado dinámicamente por app.js -->
+        <div class="preview-empty">
+          <p>✏️ Completá el formulario para ver la vista previa de tu CV</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TAB: ADAPTAR A OFERTA ===== -->
+  <section class="tab-content" id="tab-adaptar">
+    <div class="adaptar-layout">
+      <div class="adaptar-input-panel">
+        <h2>🎯 Adaptar CV a una Oferta Laboral</h2>
+        <p class="adaptar-desc">Subí una captura de pantalla del posteo de trabajo <strong>o</strong> pegá el texto directamente. El sistema extrae las palabras clave y te dice cómo adaptar tu CV.</p>
+
+        <div class="adaptar-tabs">
+          <button class="adaptar-tab active" data-at="imagen">🖼️ Subir imagen del posteo</button>
+          <button class="adaptar-tab" data-at="texto">📋 Pegar texto</button>
+        </div>
+
+        <div class="adaptar-tab-content active" id="at-imagen">
+          <label class="upload-zone" id="ofertaImageUpload">
+            <div class="upload-zone-inner">
+              <span class="upload-icon">📸</span>
+              <p>Arrastrá o hacé clic para subir la captura</p>
+              <small>JPG, PNG, WEBP — captura de LinkedIn, Facebook, WhatsApp, etc.</small>
+            </div>
+            <input type="file" id="ofertaImageInput" accept="image/*" hidden />
+          </label>
+          <img id="ofertaImagePreview" class="oferta-img-preview hidden" alt="Oferta" />
+          <button class="btn-primary" id="btnAnalyzarOferta" style="margin-top:12px">🔍 Analizar oferta</button>
+        </div>
+
+        <div class="adaptar-tab-content" id="at-texto">
+          <textarea id="ofertaTexto" rows="12" placeholder="Pegá acá el texto completo de la oferta laboral...&#10;&#10;Ej:&#10;Buscamos Operario de Cuadrilla de Redes&#10;Se requiere: experiencia en baja tensión, trabajo en altura, EPP..."></textarea>
+          <button class="btn-primary" id="btnAnalyzarTexto" style="margin-top:12px">🔍 Analizar oferta</button>
+        </div>
+
+        <div id="ofertaExtractedText" class="extracted-text-box hidden">
+          <h4>📄 Texto extraído de la imagen:</h4>
+          <div id="ofertaExtractedContent"></div>
+        </div>
+      </div>
+
+      <div class="adaptar-result-panel" id="adaptarResultPanel">
+        <div class="match-header hidden" id="matchHeader">
+          <div class="match-score-big">
+            <span id="matchPercent">0</span><span class="pct">%</span>
+          </div>
+          <p id="matchLabel">Matcheo con la oferta</p>
+        </div>
+
+        <div id="matchKeywords" class="match-keywords hidden">
+          <h4>🔑 Palabras clave detectadas en la oferta:</h4>
+          <div id="keywordsList" class="keywords-found"></div>
+        </div>
+
+        <div id="matchSugerencias" class="match-sugerencias hidden">
+          <h4>💡 Sugerencias para adaptar tu CV:</h4>
+          <div id="sugerenciasList"></div>
+          <button class="btn-primary" id="btnAplicarTodo" style="margin-top:16px">✅ Aplicar todas las sugerencias</button>
+        </div>
+
+        <div class="adaptar-empty" id="adaptarEmpty">
+          <span>🎯</span>
+          <p>Subí una imagen o pegá el texto de la oferta para ver el análisis</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TAB: COACH ATS ===== -->
+  <section class="tab-content" id="tab-coach">
+    <div class="coach-layout">
+      <div class="coach-score-panel">
+        <h2>📊 Tu puntaje ATS</h2>
+        <div class="ats-big-ring">
+          <svg viewBox="0 0 36 36" class="ats-ring-big">
+            <path class="ats-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            <path class="ats-ring-fill" id="atsRingBig" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+          </svg>
+          <span class="ats-big-number" id="atsScoreBig">0</span>
+        </div>
+        <p id="atsScoreLabelBig" class="ats-label-big">Completá el formulario</p>
+      </div>
+
+      <div class="coach-checklist-panel">
+        <h3>✅ Checklist ATS</h3>
+        <div id="atsChecklist" class="ats-checklist">
+          <!-- generado por coach.js -->
+        </div>
+      </div>
+
+      <div class="coach-tips-panel">
+        <h3>💡 Consejos en tiempo real</h3>
+        <div id="coachTips" class="coach-tips">
+          <!-- generado por coach.js -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- TEMPLATES HTML para ítems dinámicos (ocultos, usados por JS) -->
+<template id="tpl-experiencia">
+  <div class="dynamic-item" data-type="experiencia">
+    <div class="item-header">
+      <span class="item-drag">⠿</span>
+      <strong>Experiencia</strong>
+      <button class="btn-remove">✕</button>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group"><label>Empresa</label><input type="text" name="empresa" placeholder="Ej: Pura Energía SAS" /></div>
+      <div class="form-group"><label>Cargo</label><input type="text" name="cargo" placeholder="Ej: Ayudante Técnico" /></div>
+      <div class="form-group"><label>Fecha inicio</label><input type="text" name="fechaInicio" placeholder="Ej: Enero 2025" /></div>
+      <div class="form-group"><label>Fecha fin</label><input type="text" name="fechaFin" placeholder="Actual / Diciembre 2025" /></div>
+    </div>
+    <div class="form-group"><label>Descripción (usá verbos de acción)</label><textarea name="descripcion" rows="3" placeholder="Ej: Instalé sistemas fotovoltaicos, gestioné EPP, apliqué normativas AEA..."></textarea></div>
+  </div>
+</template>
+
+<template id="tpl-educacion">
+  <div class="dynamic-item" data-type="educacion">
+    <div class="item-header">
+      <span class="item-drag">⠿</span>
+      <strong>Educación</strong>
+      <button class="btn-remove">✕</button>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group"><label>Institución</label><input type="text" name="institucion" placeholder="Ej: ITP Neuquén" /></div>
+      <div class="form-group"><label>Título</label><input type="text" name="titulo" placeholder="Ej: Técnico Superior en Energías Renovables" /></div>
+      <div class="form-group"><label>Fecha inicio</label><input type="text" name="fechaInicio" placeholder="Ej: 2022" /></div>
+      <div class="form-group"><label>Fecha fin</label><input type="text" name="fechaFin" placeholder="Ej: 2025" /></div>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-idioma">
+  <div class="dynamic-item" data-type="idioma">
+    <div class="item-header">
+      <span class="item-drag">⠿</span>
+      <strong>Idioma</strong>
+      <button class="btn-remove">✕</button>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group"><label>Idioma</label><input type="text" name="idioma" placeholder="Ej: Inglés" /></div>
+      <div class="form-group"><label>Nivel</label>
+        <select name="nivel">
+          <option>Básico</option><option>Intermedio</option><option>Avanzado</option><option>Nativo</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-certificacion">
+  <div class="dynamic-item" data-type="certificacion">
+    <div class="item-header">
+      <span class="item-drag">⠿</span>
+      <strong>Certificación</strong>
+      <button class="btn-remove">✕</button>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group"><label>Nombre</label><input type="text" name="nombre" placeholder="Ej: Oficial Eléctrico VII" /></div>
+      <div class="form-group"><label>Institución / Año</label><input type="text" name="institucion" placeholder="Ej: CCT Petroleros – 2024" /></div>
+    </div>
+  </div>
+</template>
+
+<!-- LIBRERÍAS CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
+
+<!-- APP JS -->
+<script src="js/parser.js"></script>
+<script src="js/coach.js"></script>
+<script src="js/export.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
